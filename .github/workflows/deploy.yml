@@ -1,0 +1,60 @@
+name: deploy_endpoint
+on:
+  push:
+    branches: [ main ]
+    
+
+jobs:
+  build_image_push_to_ECR:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    # see: https://github.com/aws-actions/configure-aws-credentials
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
+
+    # see: https://github.com/aws-actions/amazon-ecr-login
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ACCOUNT_ID: ${{secrets.AWS_ACCOUNT_ID }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.DEPLOY_REPO_NAME }}
+        IMAGE_TAG: latest
+      run: |
+        echo "start"
+        ls
+        pip install --upgrade --user awscli
+        ./amazon-sagemaker-pytorch-detectron2/build_and_push.sh sagemaker-d2-serve latest amazon-sagemaker-pytorch-detectron2/Dockerfile.sku110kserving ap-south-1
+        
+  deploy-endpoint:
+    needs: [build_image_push_to_ECR]
+    runs-on: [ubuntu-latest]
+    container: docker://dvcorg/cml-py3:latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fire SageMaker
+      id: sm_train
+      env:
+        BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+        PREFIX: ${{ secrets.PREFIX }}
+        ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        ROLE: ${{ secrets.IAM_ROLE_NAME }}
+        SERVE_CONTAINER_NAME:  ${{ secrets.DEPLOY_REPO_NAME }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      run: |
+        pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests
+        cd amazon-sagemaker-pytorch-detectron2
+        ls
+        python deploy.py
