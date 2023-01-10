@@ -57,7 +57,7 @@ def main():
     )
 
     sklearn_processor.run(
-        code="src/preprocessing.py",
+        code="preprocessing.py",
         inputs=[
             ProcessingInput(source=input_data, destination="/opt/ml/processing/input")
         ],
