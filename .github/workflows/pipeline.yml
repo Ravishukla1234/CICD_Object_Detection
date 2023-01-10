@@ -6,6 +6,7 @@ on:
 env:
   APPLICATION_NAME: startupapp
   
+  
 jobs:
   build_image_push_to_ECR:
     runs-on: ubuntu-latest
