@@ -36,7 +36,7 @@ def main():
 
     s3 = boto3.resource("s3")
 
-    key_prefix = f"detectron2/raw_data/train.csv"
+    key_prefix = f"{PREFIX}/raw_data/train.csv"
     s3.Bucket(BUCKET_NAME).upload_file("../inputs/train.csv", key_prefix)
 
     train_dir = "../inputs/train"
@@ -44,10 +44,10 @@ def main():
     input_data = sagemaker_session.upload_data(
         train_dir,
         bucket=BUCKET_NAME,
-        key_prefix="{}/{}/{}".format("detectron2", "raw_data", "train"),
+        key_prefix="{}/{}/{}".format(PREFIX, "raw_data", "train"),
     )
 
-    input_data = "s3://{}/{}/{}".format(BUCKET_NAME, "detectron2", "raw_data")
+    input_data = "s3://{}/{}/{}".format(BUCKET_NAME, PREFIX, "raw_data")
 
     sklearn_processor = SKLearnProcessor(
         framework_version="0.20.0",
@@ -65,24 +65,24 @@ def main():
             ProcessingOutput(
                 output_name="train_data",
                 source="/opt/ml/processing/training",
-                destination="s3://object-detection-ravi123/detectron2/processed_data/training",
+                destination=f"s3://{BUCKET_NAME}/{PREFIX}/processed_data/training",
             ),
             ProcessingOutput(
                 output_name="validation_data",
                 source="/opt/ml/processing/validation",
-                destination="s3://object-detection-ravi123/detectron2/processed_data/validation",
+                destination=f"s3://{BUCKET_NAME}/{PREFIX}/processed_data/validation",
             ),
             ProcessingOutput(
                 output_name="testing_data",
                 source="/opt/ml/processing/testing",
-                destination="s3://object-detection-ravi123/detectron2/processed_data/testing",
+                destination=f"s3://{BUCKET_NAME}/{PREFIX}/processed_data/testing",
             ),
         ],
         arguments=[
             "--bucket",
             "object-detection-ravi123",
             "--prefix",
-            "detectron2/processed_data",
+            f"{PREFIX}/processed_data",
         ],
     )
 
