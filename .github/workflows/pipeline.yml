@@ -41,6 +41,9 @@ jobs:
     needs: [build_image_push_to_ECR]
     runs-on: [ubuntu-latest]
     container: docker://dvcorg/cml-py3:latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
     - uses: actions/checkout@v2
     - uses: iterative/setup-cml@v1
