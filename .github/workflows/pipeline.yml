@@ -62,3 +62,4 @@ jobs:
         python training_job.py
         cat details.txt >> report.md
         cml comment create --publish report.md
+        
