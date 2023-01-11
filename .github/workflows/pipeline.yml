@@ -1,5 +1,4 @@
 name: Pipeline
-
 on:
   push:
     branches: [ dev ]
