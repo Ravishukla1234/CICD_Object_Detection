@@ -1,5 +1,9 @@
 # CICD_for_object_detection
 
+In this project, I have tried to build a CICD pipeline for object detection usecase on Kaggle's [Global Wheat Detection Dataset](https://www.kaggle.com/competitions/global-wheat-detection/data). 
+
+To run this pipeline, follow this [medium article](https://medium.com/@ravishukla1996/ci-cd-pipeline-for-object-detection-using-amazon-sagemaker-and-github-actions-82183808a7bf) where I have discussed in details regarding all the required steps.
+
 
 ## Demo
 
